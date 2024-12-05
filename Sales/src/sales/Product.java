@@ -1,11 +1,13 @@
 package sales;
 
 
+
 public class Product implements Saleable {
 
 	private int price;
 	private int weight;
 	private String name;
+	
 	
 	//Product constructor to create a product object
 	public Product(String name, int weight, int price) {
@@ -13,6 +15,8 @@ public class Product implements Saleable {
 		this.weight = weight;
 		this.price = price;
 	}
+	
+	
 	
 	//Getter to get name which will override the method of the same name in the parent class (Saleable)
 	@Override
@@ -25,7 +29,7 @@ public class Product implements Saleable {
 		this.name = name;
 	}
 	
-	//Getter method to get price that will override the method of the same name in the parent class (Saleable
+	//Getter method to get price that will override the method of the same name in the parent class (Saleable)
 	@Override
 	public int getPrice() {
 		return price;
