@@ -1,7 +1,5 @@
 package sales;
 
-import java.util.ArrayList;
-
 public class Service implements Saleable {
 
 	private int price;
@@ -25,6 +23,11 @@ public class Service implements Saleable {
 	@Override
 	public int getPrice() {
 		return price;
+	}
+	
+	@Override
+	public String toString() {
+		return "Service name: " + name + ", Price: " + price + "p";
 	}
 	
 }

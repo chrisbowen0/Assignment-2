@@ -15,7 +15,6 @@ public class Customer {
 		this.transactions = new ArrayList<>();
 		this.products = new ArrayList<>();
 		this.services = new ArrayList<>();
-		
 		createProducts();
 		createServices();
 	}
@@ -57,23 +56,21 @@ public class Customer {
 	}
 	
 	public void displayItems() {
-    System.out.println("Available Products and Services for " + name + ":");
+    System.out.println("Available Products and Services for " + name + ":\n");
 		  
       if(!products.isEmpty()) {
 	    System.out.println("Products: ");	
 	  	for (Saleable item : products) {
-	  	  Product products = (Product) item;
-	  	  System.out.println(products.toString());
+	  	  System.out.println(((Product) item).toString());
 	  	} 
 	  } else {
 	      System.out.println("No Products available at this time.");
 	  	}
 	  	  
 	  if(!services.isEmpty()) {
-	    System.out.println("Services: ");
+	    System.out.println("\nServices: ");
 	  	for (Saleable item : services) {
-	  	  Service services = (Service) item;
-	  	  System.out.println(services.toString());
+	  	  System.out.println(((Service) item).toString());
 	  	}
 	  } else {
 		  System.out.println("No Services available at this time.");
@@ -87,14 +84,32 @@ public class Customer {
 	
 	public int getTotal() {
 		int total = 0;
+		int totalDelivery = 0;
+		
 		for (Transaction transaction : transactions) {
-			total += transaction.getValue();
+		  if (transaction instanceof Purchase) {
+		    Purchase purchase = (Purchase) transaction;
+		    
+		    for (Saleable item : purchase.getItems().keySet()) {
+		    	int itemQuantity = purchase.getItems().get(item);
+		    	
+		    	
+		    
+		  	if (item instanceof Product) {
+		  	  Product product = (Product) item;
+			  totalDelivery += product.calculateDelivery() * itemQuantity;
+			  total += item.getPrice() * itemQuantity;
+		  	}
+		    }
+	    }
+		  total += transaction.getValue();
+		
 		}
-		return total;
+		return total + totalDelivery;
 	}
 	
 	public void displayTransactions() {
-		System.out.println("Customer: " + name);
+		System.out.println("\nCustomer: " + name);
 		for (Transaction transaction : transactions) {
 			transaction.displayTransaction();
 		}
@@ -127,6 +142,29 @@ public class Customer {
 	//Visible for testing
 	protected ArrayList<Transaction> getTransactions() {
 		return transactions;
+	}
+	
+	public static void main(String[] args) {
+		Customer customer = new Customer("John Doe");
+		
+		customer.displayItems();
+		
+		Purchase productPurchase = new Purchase();
+		productPurchase.addItem(customer.getProducts().get(0), 2);
+		productPurchase.addItem(customer.getProducts().get(4), 1);
+		customer.transact(productPurchase);
+		
+		Purchase servicePurchase = new Purchase();
+		servicePurchase.addItem(customer.getServices().get(5), 3);
+		servicePurchase.addItem(customer.getServices().get(3), 2);
+		customer.transact(servicePurchase);
+		customer.displayTransactions();
+		System.out.print(" The total price for your items in transactionID: : " + customer.getTotal() + "\n");
+	    
+		Product laptop = new Product("Laptop", 250, 1000);
+		Refund refund = new Refund(laptop, 1000, "Item defective");
+		refund.displayTransaction();
+		refund.refundItem();
 	}
  	
 }

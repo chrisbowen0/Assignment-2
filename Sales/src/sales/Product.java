@@ -16,8 +16,6 @@ public class Product implements Saleable {
 		this.price = price;
 	}
 	
-	
-	
 	//Getter to get name which will override the method of the same name in the parent class (Saleable)
 	@Override
 	public String getName() {
@@ -69,7 +67,7 @@ public class Product implements Saleable {
 	//Method to return the item name, weight and price of the item. Override allows the returned information to be in a readable format
 	@Override
 	public String toString() {
-		return "Product{" + "name=" + name + '\'' + ", weight=" + weight + ", price=" + price + '}';
+		return "Product name: " + name + ", Weight: " + weight + "g, Price: " + price + "p";
 	}
 	
 }
