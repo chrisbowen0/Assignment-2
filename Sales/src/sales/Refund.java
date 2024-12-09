@@ -1,41 +1,57 @@
 package sales;
 
-public class Refund extends Transaction {
+import java.util.ArrayList;
 
+public class Refund extends Transaction {
 	private String reason;
-	private Saleable item;
+	private ArrayList<Saleable> items;
 	
 	//Constructor to create a refund object
-	public Refund(Saleable item, int value, String reason) {
-		super(value);
-		this.item = item;
+	public Refund(int value, String reason) {
+		super(value > 0 ? -value : value);
 		this.reason = reason;
+		this.items = new ArrayList<>();
 	}
 	
-	//Method to refund an item and set the refund value
-	public void refundItem() {
-		//sets a new variable using the getValue method in the transaction class as it is a protected variable
-		int refundValue = super.getValue();
-		/* using setValue method in Transaction class to set value and then uses the below check to set to a 
-		    negative value if the method is passed a positive number or leaves the number as is if it's 0 or negative */
-		super.setValue(refundValue > 0 ? -refundValue : refundValue);
-		System.out.println("Refunding item: " +  item.getName() + " Refund reason: " + reason);
+	public void addRefundItem(Saleable item) {
+		items.add(item);
+		System.out.println("Add item to refund: " + item.getName() + item.getPrice());
 	}
 	
-	//Getter to return the reason variable
+	public ArrayList<Saleable> getItems() {
+		return items;
+	}
+	
+	public void processRefund() {
+		System.out.println("Processing refund...");
+		int refundValue = 0;
+		for (Saleable item : items) {
+			refundValue -= item.getPrice();
+			
+			if (item instanceof Product) {
+				Product product = (Product) item;
+			System.out.println("Refunding item: " + item.getName() + ", Refund reason: " + reason);
+			refundValue -= product.calculateDelivery();
+			} else if (item instanceof Service) {
+				Service service =  (Service) item;
+				System.out.println("Refunding service: " + service.getName() + ", Refund reason: " + reason);
+				refundValue -= service.getPrice();
+			}
+		}
+		int value = refundValue;
+		refundValue = value > 0 ? -value : value;
+		super.setValue(refundValue);
+		System.out.println("Total refund amount: " + refundValue + "p");
+	}
+	
 	public String getReason() {
 		return reason;
-	}
-	
-	//Getter to return the item variable
-	public Saleable getItem() {
-		return item;
 	}
 	
 	//Display transaction method that overrides the method of the same name in the parent class (Transaction)
 	@Override
 	public void displayTransaction() {
-		System.out.println("Refund TransactionID: " + getTransactionID() + ", Reason for refund: " + reason + ", Refund amount: " + getValue());
+		System.out.println("Refund TransactionID: " + getTransactionID() + ", Reason for refund: " + reason + ", Refund amount: " + super.getValue() + "p");
 	}
 	
 }

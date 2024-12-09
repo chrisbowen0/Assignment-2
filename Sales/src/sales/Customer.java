@@ -79,7 +79,7 @@ public class Customer {
 	
 	public void transact(Transaction transaction) {
 		transactions.add(transaction);
-		System.out.println("Transaction added: " + transaction.getTransactionID());
+		System.out.println("\nTransaction added: " + transaction.getTransactionID());
 	    }
 	
 	public int getTotal() {
@@ -88,24 +88,32 @@ public class Customer {
 		
 		for (Transaction transaction : transactions) {
 		  if (transaction instanceof Purchase) {
+			  System.out.println("Transaction ID: " + transaction.getTransactionID() + ", Type: " + transaction.getClass().getSimpleName());
 		    Purchase purchase = (Purchase) transaction;
 		    
-		    for (Saleable item : purchase.getItems().keySet()) {
-		    	int itemQuantity = purchase.getItems().get(item);
+		     for (Saleable item : purchase.getItems().keySet()) {
+		    	int itemQuantity = purchase.getItems().get(item); 
 		    	
-		    	
-		    
-		  	if (item instanceof Product) {
-		  	  Product product = (Product) item;
-			  totalDelivery += product.calculateDelivery() * itemQuantity;
-			  total += item.getPrice() * itemQuantity;
-		  	}
-		    }
-	    }
-		  total += transaction.getValue();
-		
+		    	if (item instanceof Product) {
+		    		Product product = (Product) item;
+		    		totalDelivery += product.calculateDelivery() * itemQuantity;
+		    		
+		    	} 
+		    		total += item.getPrice() * itemQuantity;
+		    		
+		      }
+	        } else if (transaction instanceof Refund) {
+	        	Refund refund = (Refund) transaction;
+	        	  System.out.println("Refund amount deducted: " + refund.getValue() + "p");
+	        	  System.out.println(total);
+	        	 total = (total + refund.getValue());
+	        	  return total + totalDelivery;
+			    }
+		 
+		 
 		}
-		return total + totalDelivery;
+		
+		 return total + totalDelivery;
 	}
 	
 	public void displayTransactions() {
@@ -159,12 +167,22 @@ public class Customer {
 		servicePurchase.addItem(customer.getServices().get(3), 2);
 		customer.transact(servicePurchase);
 		customer.displayTransactions();
-		System.out.print(" The total price for your items in transactionID: : " + customer.getTotal() + "\n");
+		System.out.print(" The total price for your items is: " + customer.getTotal() + "\n");
+		
+		
+		Refund refund = new Refund(-1000, "Item no longer required");
+	    refund.addRefundItem(customer.getProducts().get(0));
+	    refund.addRefundItem(customer.getServices().get(3)); 
+	    refund.processRefund();
 	    
-		Product laptop = new Product("Laptop", 250, 1000);
-		Refund refund = new Refund(laptop, 1000, "Item defective");
-		refund.displayTransaction();
-		refund.refundItem();
+	    customer.displayTransactions();
+	    customer.transact(refund);
+	    refund.displayTransaction();
+	    System.out.println("Updated total after refund: " + customer.getTotal() + "p");
+	
+	
+	    
 	}
- 	
+		
 }
+ 	

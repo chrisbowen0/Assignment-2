@@ -25,6 +25,11 @@ public class Service implements Saleable {
 		return price;
 	}
 	
+	
+	public void setPrice(int price) {
+		this.price = price;
+	}
+	
 	@Override
 	public String toString() {
 		return "Service name: " + name + ", Price: " + price + "p";
