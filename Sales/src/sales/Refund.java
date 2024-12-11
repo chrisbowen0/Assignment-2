@@ -1,47 +1,48 @@
 package sales;
 
-import java.util.ArrayList;
+import java.util.HashMap;
 
 public class Refund extends Transaction {
 	private String reason;
-	private ArrayList<Saleable> items;
+	private HashMap<Saleable, Integer> items;
+	int quantity;
 	
 	//Constructor to create a refund object
-	public Refund(int value, String reason) {
-		super(value > 0 ? -value : value);
+	public Refund(Saleable item, int quantity, String reason) {
+		super(-(item.getPrice() * quantity));
 		this.reason = reason;
-		this.items = new ArrayList<>();
+		this.items = new HashMap<>();
+		this.items.put(item, quantity);
 	}
 	
-	public void addRefundItem(Saleable item) {
-		items.add(item);
-		System.out.println("Add item to refund: " + item.getName() + item.getPrice());
+	public void addRefundItem(Saleable item, int quantity, String reason) {
+		items.put(item, items.getOrDefault(item, 0) + quantity);
+		System.out.println("Add item to refund: " + item.getName() + " " + item.getPrice() + "p");
 	}
 	
-	public ArrayList<Saleable> getItems() {
+	public HashMap<Saleable, Integer> getItems() {
 		return items;
 	}
 	
 	public void processRefund() {
 		System.out.println("Processing refund...");
-		int refundValue = 0;
-		for (Saleable item : items) {
-			refundValue -= item.getPrice();
+		int total = 0;
+		
+		for (Saleable item : items.keySet()) {
+			quantity = items.get(item);
+			int refundValue = item.getPrice() * quantity;
+			total += refundValue;
 			
 			if (item instanceof Product) {
 				Product product = (Product) item;
+				int deliveryCost = product.calculateDelivery() * quantity;
 			System.out.println("Refunding item: " + item.getName() + ", Refund reason: " + reason);
-			refundValue -= product.calculateDelivery();
-			} else if (item instanceof Service) {
-				Service service =  (Service) item;
-				System.out.println("Refunding service: " + service.getName() + ", Refund reason: " + reason);
-				refundValue -= service.getPrice();
-			}
+			total += deliveryCost;
+			System.out.println("Refund value includes delivery cost of: " + deliveryCost + "p");
+			} 
 		}
-		int value = refundValue;
-		refundValue = value > 0 ? -value : value;
-		super.setValue(refundValue);
-		System.out.println("Total refund amount: " + refundValue + "p");
+		super.setValue(-total);
+		System.out.println("Total refund amount: " + (-total) + "p");
 	}
 	
 	public String getReason() {
@@ -51,7 +52,7 @@ public class Refund extends Transaction {
 	//Display transaction method that overrides the method of the same name in the parent class (Transaction)
 	@Override
 	public void displayTransaction() {
-		System.out.println("Refund TransactionID: " + getTransactionID() + ", Reason for refund: " + reason + ", Refund amount: " + super.getValue() + "p");
+		System.out.println("Refund TransactionID: " + getTransactionID() + ", Reason for refund: " + reason + ", Refund amount: " + getValue() + "p");
 	}
 	
 }

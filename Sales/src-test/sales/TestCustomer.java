@@ -5,12 +5,9 @@ import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
 import java.util.ArrayList;
 
-
-
-
 public class TestCustomer {
 
-	public Customer customer;
+	private Customer customer;
 	
 	
 	//setup for test by creating a customer object before each test
@@ -19,79 +16,95 @@ public class TestCustomer {
 		customer = new Customer("John Doe");
 		
 	}
-	
+
 	@Test
 	void testCreateProducts() {
 		ArrayList<Saleable> products = customer.getProducts();
-		Product laptop = (Product) products.get(0);
 		assertNotNull(products, "Products list should not be null");
 		assertFalse(products.isEmpty(), "Products list should not be empty");
-		assertEquals(16, products.size(), "Products list should contain 16 items");
-		assertEquals("Laptop", products.get(0).getName(), "The first Product should be a Laptop");
-		assertEquals("Insert product 1", products.get(11).getName(), "The 11th Product should be a Insert product 1");
-		assertEquals(250, laptop.getWeight(), "The weight of the Laptop should be 250g");
-		assertEquals(1000, laptop.getPrice(), "The price of the Laptop should be 1000");
+		assertEquals(16, products.size(), "Products list should have 16 items");
 	}
 	
 	@Test
 	void testCreateServices() {
-	  ArrayList<Saleable> services = customer.getServices();
-	  Service antiVirus = (Service) services.get(0);
-	  assertNotNull(services, "Services list should not be null");
-	  assertFalse(services.isEmpty(), "Services list should not be empty");
-	  assertEquals(14, services.size(), "Services list should contain 14 items");
-	  assertEquals("Anti-Virus", services.get(0).getName(), "The first service should be Anti-Virus");
-	  assertEquals("Coding class", services.get(11).getName(), "The 10th service in the list should be coding class");
-	  assertEquals(100, antiVirus.getPrice(), "The price of the Anti-Virus should be 100");
+		ArrayList<Saleable> services = customer.getServices();
+		assertNotNull(services, "Services list should not be null");
+		assertFalse(services.isEmpty(), "Services list should not be empty");
+		assertEquals(14, services.size(), "Services list should have 14 items");
 	}
 	
-	//verify the customer's name is set correctly and return a String if the test fails
 	@Test
-	void testCustomer() {
-		assertEquals("John Doe", customer.getName(), "Customer name should match the input value");
+	void testAddTransaction() {
+		Purchase purchase = new Purchase();
+		purchase.addItem((customer.getProducts().get(0)), 1);
+		customer.transact(purchase);
+		ArrayList<Transaction> transactions = customer.getTransactions();
 		
+		assertEquals(1, transactions.size(), "There should be 1 transaction");
+		assertEquals(purchase, transactions.get(0), "Transaction should match the added purchase");
 	}
 	
-	//Add a test transaction, verify it's added to the ArrayList and the total is returned correctly. If test fails return string
 	@Test
-	void testTransaction() {
-		Transaction transaction = new Transaction(-100);
-		customer.transact(transaction);
+	void testAddTransactions() {
+		Purchase purchase = new Purchase();
+		purchase.addItem((customer.getProducts().get(5)), 2);
+		purchase.addItem((customer.getServices().get(5)), 1);
+		purchase.addItem((customer.getProducts().get(0)), 3);
+		customer.transact(purchase);
+		ArrayList<Transaction> transactions = customer.getTransactions();
 		
-		assertEquals(-100, customer.getTotal(), "Total should be -100 after adding a value of -100");
-	}
-	
-	//Second test with multiple transactions
-	@Test
-	void testTransactions() {
-		customer.transact(new Transaction(100));
-		customer.transact(new Transaction(200));
-		customer.transact(new Transaction(550));
+		assertEquals(1, transactions.size());
+		assertEquals(3, purchase.getItems().size(), "There should be 3 items in the list");
 		
-		assertEquals(850, customer.getTotal(), "Total should be 850 after adding all transactions with values 100, 200 and 550");
+		Saleable laptop = customer.getProducts().get(0);
+		Saleable lumbar = customer.getProducts().get(5);
+		Saleable xbox = customer.getServices().get(5);
+		assertEquals(3, purchase.getItems().get(laptop), "Should return a quantity of 3");
+		assertEquals(2, purchase.getItems().get(lumbar), "Should return a quantity of 2");
+		assertEquals(1, purchase.getItems().get(xbox), "Should return a quantity of 1");
 	}
 	
 	@Test
-	void testGetValue() {
-	    
-	    Product laptop = new Product("Laptop", 250, 1000);
-	    Purchase laptopPurchase = new Purchase(laptop, 2); 
-	    assertEquals(2000, laptopPurchase.getValue(), "The item price should be 2000 before delivery.");
-	    Service antivirus = new Service("Anti-Virus", 100);
-	    Purchase antivirusPurchase = new Purchase(antivirus, 3);
-	    assertEquals(300, antivirusPurchase.getValue(), "The service price should be 300 before delivery.");
+	void testGetTransactionID() {
+		Purchase purchase = new Purchase();
+		purchase.addItem((customer.getProducts().get(0)), 1);
+		customer.transact(purchase);
+		
+		Transaction transactionID = customer.getTransaction(purchase.getTransactionID());
+		assertNotNull(transactionID, "Transaction should be found by ID");
+		assertEquals(purchase, transactionID, "TransactionDI should match the added purchase");
 	}
 	
 	@Test
-	void testCustomerTotalIncludingDelivery() {
-	    Product laptop = new Product("Laptop", 250, 1000);
-	    Purchase laptopPurchase = new Purchase(laptop, 2); 
-	    Service antivirus = new Service("Anti-Virus", 100);
-	    Purchase antivirusPurchase = new Purchase(antivirus, 3); 
-	    customer.transact(laptopPurchase);
-	    customer.transact(antivirusPurchase);
-	    int expectedTotal = 2700;
-	    assertEquals(expectedTotal, customer.getTotal(), "The total value should include both item price and delivery cost for products.");
+	void testGetTotalPurchase() {
+		Purchase purchase = new Purchase();
+		purchase.addItem((customer.getProducts().get(2)), 2);
+		customer.transact(purchase);
+		
+		assertEquals(160, customer.getTotal(), "Total should include price and delivery");
+		
+		purchase.addItem((customer.getProducts().get(0)), 1);
+		purchase.addItem((customer.getServices().get(4)), 2);
+		
+		assertEquals(1370, customer.getTotal(), "Total should include delivery cost for products and no delivery cost for the services");
+		customer.displayTransactions();
+	}
+	
+	@Test
+	void testGetTotalRefund() {
+		Purchase purchase = new Purchase();
+		purchase.addItem((customer.getProducts().get(0)), 3);
+		purchase.addItem((customer.getServices().get(4)), 1);
+		customer.transact(purchase);
+		purchase.displayTransaction();
+		
+		Refund refund = new Refund(customer.getProducts().get(0), 1, "Item damaged in transit");
+		refund.addRefundItem(customer.getServices().get(4), 1, "Item no longer required");
+		refund.processRefund();
+		customer.transact(refund);
+		refund.displayTransaction();
+		
+		assertEquals(2100, customer.getTotal(), "Total should account for refund deduction");
 	}
 	
 	

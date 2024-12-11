@@ -42,8 +42,9 @@ public class Purchase extends Transaction {
 	        int totalDelivery = 0;
 	        int subtotal = 0;
 
-	        for (Saleable item : items.keySet()) {
-	            int quantity = items.get(item);
+	        for (Saleable currentItem : items.keySet()) {
+	        	this.item = currentItem;
+	            quantity = items.get(item);
 	            int itemSubtotal = item.getPrice() * quantity;
 	            subtotal += itemSubtotal;
 

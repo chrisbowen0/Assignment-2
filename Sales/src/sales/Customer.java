@@ -30,7 +30,7 @@ public class Customer {
 		products.add(new Product("Wireless headset with blueetooth", 10, 30));
 		products.add(new Product("22 inch monitor", 200, 300));
 		products.add(new Product("Wired mouse", 15, 30));
-		products.add(new Product("wired headset", 10, 30));
+		products.add(new Product("Wired headset", 10, 30));
 		products.add(new Product("Insert product 1", 10, 10));
 		products.add(new Product("Insert product 2", 10, 10));
 		products.add(new Product("Insert product 3", 10, 10));
@@ -79,7 +79,7 @@ public class Customer {
 	
 	public void transact(Transaction transaction) {
 		transactions.add(transaction);
-		System.out.println("\nTransaction added: " + transaction.getTransactionID());
+		System.out.println("Transaction added: " + transaction.getTransactionID() + "\n");
 	    }
 	
 	public int getTotal() {
@@ -88,7 +88,6 @@ public class Customer {
 		
 		for (Transaction transaction : transactions) {
 		  if (transaction instanceof Purchase) {
-			  System.out.println("Transaction ID: " + transaction.getTransactionID() + ", Type: " + transaction.getClass().getSimpleName());
 		    Purchase purchase = (Purchase) transaction;
 		    
 		     for (Saleable item : purchase.getItems().keySet()) {
@@ -105,8 +104,8 @@ public class Customer {
 	        } else if (transaction instanceof Refund) {
 	        	Refund refund = (Refund) transaction;
 	        	  System.out.println("Refund amount deducted: " + refund.getValue() + "p");
-	        	  System.out.println(total);
 	        	 total = (total + refund.getValue());
+	        	 System.out.println("Total amount after refund: " + (total + totalDelivery) + "p");
 	        	  return total + totalDelivery;
 			    }
 		 
@@ -170,15 +169,16 @@ public class Customer {
 		System.out.print(" The total price for your items is: " + customer.getTotal() + "\n");
 		
 		
-		Refund refund = new Refund(-1000, "Item no longer required");
-	    refund.addRefundItem(customer.getProducts().get(0));
-	    refund.addRefundItem(customer.getServices().get(3)); 
+		Refund refund = new Refund(customer.getProducts().get(0), 1, "Items no longer required");
+	    refund.addRefundItem(customer.getProducts().get(0), 1, "Doesn't like the spec");
+	    refund.addRefundItem(customer.getServices().get(3), 1, "No longer required"); 
+	    refund.addRefundItem(customer.getServices().get(3), 1, "No longer required");
 	    refund.processRefund();
 	    
 	    customer.displayTransactions();
 	    customer.transact(refund);
 	    refund.displayTransaction();
-	    System.out.println("Updated total after refund: " + customer.getTotal() + "p");
+	    customer.getTotal();
 	
 	
 	    
